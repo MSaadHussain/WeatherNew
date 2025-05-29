@@ -3,27 +3,14 @@ import './App.css'; // Optional: define background styles here
 import axios from 'axios';
 
 const App = () => {
-  const [city, setCity] = useState('London');
+  const [city, setCity] = useState('karachi');
   const [inputCity, setInputCity] = useState('');
   const [weatherData, setWeatherData] = useState(null);
   const [bgClass, setBgClass] = useState('day'); // Default class
 
   const apiKey = 'bf7d4f3f6e7e4e21bee202243252905';
-  
-  const fetchWeather = async (cityName) => {
-    try {
-      const response = await axios.get(
-        `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${cityName}`
-      );
-      setWeatherData(response.data);
-      setCity(cityName);
-      updateBackground(response.data.location.localtime);
-    } catch (error) {
-      console.error('Error fetching weather:', error);
-      setWeatherData(null);
-    }
-  };
 
+  // Function to update background based on localtime string
   const updateBackground = (localtime) => {
     const hour = new Date(localtime).getHours();
     if (hour >= 6 && hour < 12) {
@@ -35,17 +22,31 @@ const App = () => {
     }
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (inputCity.trim() !== '') {
-      fetchWeather(inputCity);
-      setInputCity('');
+  // Move this function outside useEffect
+  const fetchWeather = async (cityToFetch) => {
+    try {
+      const response = await axios.get(
+        `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${cityToFetch}`
+      );
+      setWeatherData(response.data);
+      updateBackground(response.data.location.localtime);
+    } catch (error) {
+      console.error('Error fetching weather:', error);
+      setWeatherData(null);
     }
   };
 
   useEffect(() => {
     fetchWeather(city);
-  }, []);
+  }, [city]); // Now only city is the dependency
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (inputCity.trim() !== '') {
+      setCity(inputCity.trim());
+      setInputCity('');
+    }
+  };
 
   return (
     <div className={`app-container ${bgClass}`}>
