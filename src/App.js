@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import './App.css'; // Optional: define background styles here
+import React, { useState, useEffect, useCallback } from 'react';
+import './App.css';
 import axios from 'axios';
 
 const App = () => {
   const [city, setCity] = useState('karachi');
   const [inputCity, setInputCity] = useState('');
   const [weatherData, setWeatherData] = useState(null);
-  const [bgClass, setBgClass] = useState('day'); // Default class
+  const [bgClass, setBgClass] = useState('day');
 
   const apiKey = 'bf7d4f3f6e7e4e21bee202243252905';
 
-  // Function to update background based on localtime string
   const updateBackground = (localtime) => {
     const hour = new Date(localtime).getHours();
     if (hour >= 6 && hour < 12) {
@@ -22,11 +21,11 @@ const App = () => {
     }
   };
 
-  // Move this function outside useEffect
-  const fetchWeather = async (cityToFetch) => {
+  // ✅ Memoize fetchWeather so it can safely be used in useEffect
+  const fetchWeather = useCallback(async () => {
     try {
       const response = await axios.get(
-        `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${cityToFetch}`
+        `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}`
       );
       setWeatherData(response.data);
       updateBackground(response.data.location.localtime);
@@ -34,11 +33,11 @@ const App = () => {
       console.error('Error fetching weather:', error);
       setWeatherData(null);
     }
-  };
+  }, [city]);
 
   useEffect(() => {
-    fetchWeather(city);
-  }, [city]); // Now only city is the dependency
+    fetchWeather();
+  }, [fetchWeather]);
 
   const handleSearch = (e) => {
     e.preventDefault();
