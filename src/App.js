@@ -49,6 +49,7 @@ const App = () => {
 
   return (
     <div className={`app-container ${bgClass}`}>
+      <h1 className="app-heading">Weather App</h1>
       <div className="search-bar">
         <form onSubmit={handleSearch}>
           <input
